@@ -1,1 +1,1 @@
-bucket_name = "ganeshtudumu-s3bucket-12345"
+bucket_name = "ganeshtudumu-s3bucket-123456"
