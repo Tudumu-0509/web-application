@@ -2,57 +2,40 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('aws-cred')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
-        AWS_DEFAULT_REGION     = "us-east-1"
+        AWS_ACCESS_KEY_ID     = credentials('aws-creds')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
+        AWS_DEFAULT_REGION    = "us-east-1"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
+                git branch: 'main', url: 'https://github.com/Tudumu-0509/web-application.git'
             }
         }
 
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
-                    sh '''
-                        terraform init
-                    '''
+                    sh 'terraform init'
                 }
             }
         }
 
-        stage('Terraform Plan') {
+        stage('Terraform Plan S3') {
             steps {
                 dir('terraform') {
-                    sh '''
-                        terraform plan
-                    '''
+                    sh 'terraform plan -target=aws_s3_bucket.my_bucket'
                 }
             }
         }
 
-        stage('Terraform Apply') {
+        stage('Terraform Apply S3') {
             steps {
-                input message: "Do you want to create S3 bucket?"
                 dir('terraform') {
-                    sh '''
-                        terraform apply -auto-approve
-                    '''
+                    sh 'terraform apply -auto-approve -target=aws_s3_bucket.my_bucket'
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ S3 Bucket created successfully!'
-        }
-        failure {
-            echo '❌ Terraform failed! Check logs.'
         }
     }
 }
