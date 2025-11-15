@@ -34,7 +34,8 @@ pipeline {
             steps {
                 input message: "Do you want to launch EC2 instance?"
                 sh '''
-                    terraform apply -auto-approve
+                terraform apply -replace="aws_instance.my_ec2" -auto-approve
+                    
                 '''
             }
         }
