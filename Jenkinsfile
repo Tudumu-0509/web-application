@@ -22,7 +22,7 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform-jenkins') {
-                    sh 'terraform init'
+                    sh 'terraform init -input=false'
                 }
             }
         }
