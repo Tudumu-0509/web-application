@@ -28,7 +28,7 @@ variable "instance_name" {
 
 # Key pair name
 variable "key_name" {
-  description = "Existing AWS Key Pair Name"
+  description = "key"
   type        = string
   default     = "North"
 }
