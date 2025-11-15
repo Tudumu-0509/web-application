@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('aws-cred')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
-        AWS_DEFAULT_REGION     = "us-east-1"
+        AWS_ACCESS_KEY_ID     = credentials('aws-cred') // Jenkins credentials ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // Same Jenkins credentials ID
+        AWS_DEFAULT_REGION    = "us-east-1"
     }
 
     stages {
@@ -22,7 +22,8 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform-jenkins') {
-                    sh 'terraform init -input=false'
+                    // -input=false avoids interactive prompt
+                    sh 'terraform init -input=false -backend-config="bucket=ganeshtudumu-s3bucket-123458" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"'
                 }
             }
         }
@@ -54,4 +55,3 @@ pipeline {
         }
     }
 }
-
