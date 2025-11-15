@@ -23,7 +23,7 @@ variable "instance_type" {
 variable "instance_name" {
   description = "Tag name for the EC2 instance"
   type        = string
-  default     = "Terraform-EC2"
+  default     = "aravind-EC2"
 }
 
 # Key pair name
