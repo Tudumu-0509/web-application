@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/usr/local/bin:$PATH"   // AWS CLI location add
+        PATH = "/usr/local/bin:$PATH"   // Add AWS CLI location
         AWS_ACCESS_KEY_ID     = credentials('aws-cred') // Jenkins credentials ID
         AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
         AWS_DEFAULT_REGION    = "us-east-1"
@@ -37,7 +37,8 @@ pipeline {
                     sh '''
                         terraform init -backend-config="bucket=ganeshtudumu-s3bucket-123458" \
                                        -backend-config="key=terraform-state/terraform.tfstate" \
-                                       -backend-config="region=us-east-1" -input=false
+                                       -backend-config="region=us-east-1" \
+                                       -force-copy
                     '''
                 }
             }
@@ -69,4 +70,3 @@ pipeline {
         }
     }
 }
-
