@@ -37,10 +37,10 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                input message: "Do you want to launch EC2 instance?"
+                input message: "Do you want to create S3 bucket?"
                 dir('terraform') {
                     sh '''
-                        terraform apply -replace="aws_instance.my_ec2" -auto-approve
+                        terraform apply -auto-approve
                     '''
                 }
             }
@@ -49,11 +49,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ EC2 Instance launched successfully!'
+            echo '✅ S3 Bucket created successfully!'
         }
         failure {
             echo '❌ Terraform failed! Check logs.'
         }
     }
 }
-
