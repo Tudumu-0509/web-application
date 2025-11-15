@@ -9,10 +9,13 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Development Branch') {
             steps {
-                git branch: 'development',
-                    url: 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/development']],
+                    userRemoteConfigs: [[url: 'https://github.com/Tudumu-0509/web-application.git']]
+                ])
             }
         }
 
@@ -51,3 +54,4 @@ pipeline {
         }
     }
 }
+
