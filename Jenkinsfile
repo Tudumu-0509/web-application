@@ -8,6 +8,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
@@ -16,27 +17,32 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                sh '''
-                    terraform init
-                '''
+                dir('terraform') {
+                    sh '''
+                        terraform init
+                    '''
+                }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh '''
-                    terraform plan
-                '''
+                dir('terraform') {
+                    sh '''
+                        terraform plan
+                    '''
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
                 input message: "Do you want to launch EC2 instance?"
-                sh '''
-                terraform apply -replace="aws_instance.my_ec2" -auto-approve
-                    
-                '''
+                dir('terraform') {
+                    sh '''
+                        terraform apply -replace="aws_instance.my_ec2" -auto-approve
+                    '''
+                }
             }
         }
     }
@@ -50,3 +56,4 @@ pipeline {
         }
     }
 }
+
