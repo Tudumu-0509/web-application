@@ -8,35 +8,36 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'development',
-            url: 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
+                    url: 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh '''
-                    terraform init
-                '''
+                dir('terraform-jenkins') {
+                    sh 'terraform init'
+                }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh '''
-                    terraform plan
-                '''
+                dir('terraform-jenkins') {
+                    sh 'terraform plan'
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
                 input message: "Do you want to launch EC2 instance?"
-                sh '''
-                    terraform apply -auto-approve
-                '''
+                dir('terraform-jenkins') {
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
     }
