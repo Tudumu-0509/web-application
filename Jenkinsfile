@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-cred') // Jenkins credentials ID
-        AWS_SECRET_ACCESS_KEY = credentials('aws-cred') // Same Jenkins credentials ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
         AWS_DEFAULT_REGION    = "us-east-1"
     }
 
@@ -19,11 +19,25 @@ pipeline {
             }
         }
 
+        stage('Ensure S3 Bucket for Terraform State') {
+            steps {
+                script {
+                    sh '''
+                        aws s3api head-bucket --bucket ganeshtudumu-s3bucket-123458 2>/dev/null || \
+                        aws s3api create-bucket --bucket ganeshtudumu-s3bucket-123458 --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1
+                    '''
+                }
+            }
+        }
+
         stage('Terraform Init') {
             steps {
                 dir('terraform-jenkins') {
-                    // -input=false avoids interactive prompt
-                    sh 'terraform init -input=false -backend-config="bucket=ganeshtudumu-s3bucket-123458" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"'
+                    sh '''
+                        terraform init -backend-config="bucket=ganeshtudumu-s3bucket-123458" \
+                                       -backend-config="key=terraform-state/terraform.tfstate" \
+                                       -backend-config="region=us-east-1" -input=false
+                    '''
                 }
             }
         }
@@ -38,7 +52,6 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                input message: "Do you want to launch EC2 instance?"
                 dir('terraform-jenkins') {
                     sh 'terraform apply -auto-approve'
                 }
@@ -48,7 +61,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ EC2 Instance launched successfully!'
+            echo '✅ EC2 Instance and S3 Bucket created successfully!'
         }
         failure {
             echo '❌ Terraform failed! Check logs.'
