@@ -11,7 +11,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/Tudumu-0509/web-application.git'
+                git branch: 'main', url: 'https://github.com/Tudumu-0509/web-application.git'
             }
         }
 
