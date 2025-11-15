@@ -10,7 +10,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
+                git branch: 'development',
+            url: 'https://github.com/Tudumu-0509/maven-webapplication-project-kkfunda.git'
             }
         }
 
