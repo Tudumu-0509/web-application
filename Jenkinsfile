@@ -20,17 +20,7 @@ pipeline {
             }
         }
 
-        stage('Ensure S3 Bucket for Terraform State') {
-            steps {
-                script {
-                    sh '''
-                        aws s3api head-bucket --bucket ganeshtudumu-s3bucket-123458 2>/dev/null || \
-                        aws s3api create-bucket --bucket ganeshtudumu-s3bucket-123458 --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1
-                    '''
-                }
-            }
-        }
-
+       
         stage('Terraform Init') {
             steps {
                 dir('terraform-jenkins') {
