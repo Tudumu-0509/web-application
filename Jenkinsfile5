@@ -12,19 +12,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Git Repo నుండి కోడ్ ని check out చేస్తుంది
                 checkout scm
             }
         }
 
         stage('Setup AWS Credentials') {
             steps {
-                // Credentials plugin ద్వారా AWS key మరియు secret ను environment variables గా set చేస్తుంది
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
-                                  credentialsId: 'aws-cred']]) {
-                    sh '''
-                    echo "AWS credentials set"
-                    '''
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                    sh 'echo "AWS credentials set"'
                 }
             }
         }
@@ -32,8 +27,20 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform-workspace') {
-                    // Removed -backend-config flag; terraform reads backend from .tf files directly
-                    sh 'terraform init'
+                    sh '''
+                        terraform init
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Format & Validate') {
+            steps {
+                dir('terraform-workspace') {
+                    sh '''
+                        terraform fmt -check
+                        terraform validate
+                    '''
                 }
             }
         }
@@ -42,8 +49,7 @@ pipeline {
             steps {
                 dir('terraform-workspace') {
                     sh """
-                    terraform workspace list | grep ${ENV} || terraform workspace new ${ENV}
-                    terraform workspace select ${ENV}
+                        terraform workspace select ${ENV} || terraform workspace new ${ENV}
                     """
                 }
             }
@@ -52,7 +58,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 dir('terraform-workspace') {
-                    sh "terraform plan -var-file=env/${ENV}.tfvars"
+                    sh "terraform plan -var-file=env/${ENV}.tfvars -out=tfplan"
                 }
             }
         }
@@ -60,7 +66,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('terraform-workspace') {
-                    sh "terraform apply -var-file=env/${ENV}.tfvars -auto-approve"
+                    sh "terraform apply -auto-approve tfplan"
                 }
             }
         }
@@ -69,7 +75,7 @@ pipeline {
     post {
         always {
             echo "Cleaning up workspace..."
-            cleanWs() // Build తరువాత workspace ను clean చేస్తుంది
+            cleanWs()
         }
         success {
             echo "Terraform Apply Completed Successfully for ${ENV}"
@@ -79,4 +85,5 @@ pipeline {
         }
     }
 }
+
 
