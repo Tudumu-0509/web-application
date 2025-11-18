@@ -6,21 +6,33 @@ pipeline {
     }
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-cred')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
-        AWS_DEFAULT_REGION     = "ap-south-1"
+        AWS_DEFAULT_REGION = "ap-south-1"
     }
 
     stages {
         stage('Checkout') {
             steps {
+                // Git Repo నుండి కోడ్ ని check out చేస్తుంది
                 checkout scm
+            }
+        }
+
+        stage('Setup AWS Credentials') {
+            steps {
+                // Credentials plugin ద్వారా AWS key మరియు secret ను environment variables గా set చేస్తుంది
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-cred']]) {
+                    sh '''
+                    echo "AWS credentials set"
+                    '''
+                }
             }
         }
 
         stage('Terraform Init') {
             steps {
                 dir('terraform-workspace') {
+                    // S3 backend configuration check
                     sh 'terraform init -backend-config=backend/backend.tf'
                 }
             }
@@ -51,6 +63,19 @@ pipeline {
                     sh "terraform apply -var-file=env/${ENV}.tfvars -auto-approve"
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up workspace..."
+            cleanWs() // Build తరువాత workspace ను clean చేస్తుంది
+        }
+        success {
+            echo "Terraform Apply Completed Successfully for ${ENV}"
+        }
+        failure {
+            echo "Terraform Pipeline Failed for ${ENV}"
         }
     }
 }
