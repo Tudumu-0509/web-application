@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        AWS_DEFAULT_REGION = "ap-south-1"  // Change this to your bucket's region if needed
+        AWS_DEFAULT_REGION = "ap-south-1"
     }
 
     stages {
@@ -58,9 +58,13 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 dir('terraform-workspace') {
-                    sh '''
-                        terraform plan -var-file=env/${ENV}.tfvars -out=tfplan
-                    '''
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                        sh '''
+                            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                            terraform plan -var-file=env/${ENV}.tfvars -out=tfplan
+                        '''
+                    }
                 }
             }
         }
@@ -68,9 +72,13 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('terraform-workspace') {
-                    sh '''
-                        terraform apply -auto-approve tfplan
-                    '''
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                        sh '''
+                            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                            terraform apply -auto-approve tfplan
+                        '''
+                    }
                 }
             }
         }
