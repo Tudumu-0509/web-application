@@ -16,20 +16,20 @@ pipeline {
             }
         }
 
-        stage('Setup AWS Credentials') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
-                    sh 'echo "AWS credentials set"'
-                }
-            }
-        }
-
         stage('Terraform Init') {
             steps {
                 dir('terraform-workspace') {
-                    sh '''
-                        terraform init
-                    '''
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                        // Pass AWS credentials directly to the backend during init
+                        sh '''
+                        terraform init \
+                            -backend-config="bucket=terraform-backend-ganesh-bucket-001" \
+                            -backend-config="key=ec2/${ENV}/terraform.tfstate" \
+                            -backend-config="region=ap-south-1" \
+                            -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
+                            -backend-config="secret_key=$AWS_SECRET_ACCESS_KEY"
+                        '''
+                    }
                 }
             }
         }
@@ -85,5 +85,3 @@ pipeline {
         }
     }
 }
-
-
