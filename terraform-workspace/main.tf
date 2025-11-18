@@ -12,7 +12,7 @@ resource "aws_instance" "my_ec2" {
 }
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "${var.env}-myapp-bucket-12345"
+  bucket = "${var.env}-myapp-bucket"
 
   tags = {
     Environment = var.env
