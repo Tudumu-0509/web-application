@@ -1,1 +1,40 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'ENV', choices: ['dev', 'prod'], description: 'Select Environment')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh """
+                terraform init -backend-config=backend/backend.tf
+                """
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                sh """
+                terraform plan -var-file=env/${ENV}.tfvars
+                """
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh """
+                terraform apply -var-file=env/${ENV}.tfvars -auto-approve
+                """
+            }
+        }
+    }
+}
 
