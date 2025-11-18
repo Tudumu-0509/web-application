@@ -5,6 +5,11 @@ pipeline {
         choice(name: 'ENV', choices: ['dev', 'prod'], description: 'Select Environment')
     }
 
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-cred')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -14,25 +19,36 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                sh """
-                terraform init -backend-config=backend/backend.tf
-                """
+                dir('terraform-workspace') {
+                    sh 'terraform init -backend-config=backend/backend.tf'
+                }
+            }
+        }
+
+        stage('Select Workspace') {
+            steps {
+                dir('terraform-workspace') {
+                    sh """
+                    terraform workspace list | grep ${ENV} || terraform workspace new ${ENV}
+                    terraform workspace select ${ENV}
+                    """
+                }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh """
-                terraform plan -var-file=env/${ENV}.tfvars
-                """
+                dir('terraform-workspace') {
+                    sh "terraform plan -var-file=env/${ENV}.tfvars"
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh """
-                terraform apply -var-file=env/${ENV}.tfvars -auto-approve
-                """
+                dir('terraform-workspace') {
+                    sh "terraform apply -var-file=env/${ENV}.tfvars -auto-approve"
+                }
             }
         }
     }
