@@ -12,12 +12,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // Git Repo నుండి కోడ్ ని check out చేస్తుంది
                 checkout scm
             }
         }
 
         stage('Setup AWS Credentials') {
             steps {
+                // Credentials plugin ద్వారా AWS key మరియు secret ను environment variables గా set చేస్తుంది
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
                                   credentialsId: 'aws-cred']]) {
                     sh '''
@@ -30,7 +32,8 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform-workspace') {
-                    sh 'terraform init -backend-config=backend.tf'
+                    // Removed -backend-config flag; terraform reads backend from .tf files directly
+                    sh 'terraform init'
                 }
             }
         }
@@ -66,7 +69,7 @@ pipeline {
     post {
         always {
             echo "Cleaning up workspace..."
-            cleanWs()
+            cleanWs() // Build తరువాత workspace ను clean చేస్తుంది
         }
         success {
             echo "Terraform Apply Completed Successfully for ${ENV}"
@@ -76,3 +79,4 @@ pipeline {
         }
     }
 }
+
