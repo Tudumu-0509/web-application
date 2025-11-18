@@ -23,7 +23,7 @@ pipeline {
                         // Pass AWS credentials directly to the backend during init
                         sh '''
                         terraform init \
-                            -backend-config="bucket=terraform-backend-ganesh-bucket-001" \
+                            -backend-config="tudumuganesh-1" \
                             -backend-config="key=ec2/${ENV}/terraform.tfstate" \
                             -backend-config="region=ap-south-1" \
                             -backend-config="access_key=$AWS_ACCESS_KEY_ID" \
