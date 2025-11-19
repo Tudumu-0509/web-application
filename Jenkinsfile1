@@ -1,1 +1,37 @@
+pipeline {
+    agent any
+    environment {
+        TF_WORKSPACE = "${params.ENVIRONMENT}"
+        AWS_ACCESS_KEY_ID     = credentials('aws-cred')   // Jenkins Credential ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')   // Jenkins Credential ID
+        AWS_DEFAULT_REGION    = 'ap-south-1'
+    }
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'], description: 'Select environment')
+    }
+    stages {
+        stage('Init Terraform') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform init'
+                    sh "terraform workspace select ${TF_WORKSPACE} || terraform workspace new ${TF_WORKSPACE}"
+                }
+            }
+        }
+        stage('Plan Terraform') {
+            steps {
+                dir('terraform') {
+                    sh "terraform plan -var-file=${TF_WORKSPACE}.tfvars"
+                }
+            }
+        }
+        stage('Apply Terraform') {
+            steps {
+                dir('terraform') {
+                    sh "terraform apply -auto-approve -var-file=${TF_WORKSPACE}.tfvars"
+                }
+            }
+        }
+    }
+}
 
