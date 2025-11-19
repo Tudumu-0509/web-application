@@ -1,11 +1,5 @@
 pipeline {
     agent any
-    environment {
-        TF_WORKSPACE = "${params.ENVIRONMENT}"
-        AWS_ACCESS_KEY_ID     = credentials('aws-cred')   // Jenkins Credential ID
-        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')   // Jenkins Credential ID
-        AWS_DEFAULT_REGION    = 'ap-south-1'
-    }
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'], description: 'Select environment')
     }
@@ -13,22 +7,37 @@ pipeline {
         stage('Init Terraform') {
             steps {
                 dir('terraform') {
+                    // Initialize Terraform
                     sh 'terraform init'
-                    sh "terraform workspace select ${TF_WORKSPACE} || terraform workspace new ${TF_WORKSPACE}"
+                    
+                    // Handle workspaces
+                    script {
+                        def workspace = params.ENVIRONMENT
+                        def existingWorkspaces = sh(script: 'terraform workspace list', returnStdout: true).trim().split("\n")
+                        if (!existingWorkspaces.collect{ it.replace("*","").trim() }.contains(workspace)) {
+                            sh "terraform workspace new ${workspace}"
+                        } else {
+                            sh "terraform workspace select ${workspace}"
+                        }
+                    }
                 }
             }
         }
         stage('Plan Terraform') {
             steps {
                 dir('terraform') {
-                    sh "terraform plan -var-file=${TF_WORKSPACE}.tfvars"
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                        sh "terraform plan -var-file=${params.ENVIRONMENT}.tfvars"
+                    }
                 }
             }
         }
         stage('Apply Terraform') {
             steps {
                 dir('terraform') {
-                    sh "terraform apply -auto-approve -var-file=${TF_WORKSPACE}.tfvars"
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                        sh "terraform apply -auto-approve -var-file=${params.ENVIRONMENT}.tfvars"
+                    }
                 }
             }
         }
