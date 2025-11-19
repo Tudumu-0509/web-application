@@ -14,6 +14,9 @@ provider "aws" {
 resource "random_string" "suffix" {
   length  = 6
   special = false
+  upper   = false     # FIX: No uppercase letters
+  number  = true
+  lower   = true
 }
 
 resource "aws_instance" "my_ec2" {
