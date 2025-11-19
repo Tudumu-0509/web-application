@@ -14,22 +14,27 @@ pipeline {
                 dir('terraform') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
                         script {
-                            def workspace = params.ENVIRONMENT
-                            def tfvarsFile = "${workspace}.tfvars"
-                            
-                            // Select backend bucket based on environment
-                            def backendBucket = (workspace == "dev") ? "terraform-state-ganesh-dev" : "terraform-state-ganesh-prod"
-                            
-                            // Initialize Terraform backend with environment-specific bucket
-                            sh "terraform init -reconfigure -backend-config=bucket=${backendBucket} -backend-config=region=us-east-1 -var-file=${tfvarsFile}"
-                            
-                            // Handle Terraform workspaces
-                            def existingWorkspaces = sh(script: 'terraform workspace list', returnStdout: true).trim().split("\n")
-                            if (!existingWorkspaces.collect{ it.replace('*','').trim() }.contains(workspace)) {
-                                sh "terraform workspace new ${workspace}"
-                            } else {
-                                sh "terraform workspace select ${workspace}"
+                            // Environment variables
+                            def envName = params.ENVIRONMENT
+                            def tfvarsFile = "${envName}.tfvars"
+                            def backendBucket = "my-app-bucket-ganesh-${envName}"
+                            def awsRegion = "ap-south-1"
+
+                            // Initialize Terraform with environment-specific backend
+                            sh """
+                                terraform init -reconfigure \
+                                    -backend-config=bucket=${backendBucket} \
+                                    -backend-config=key=terraform.tfstate \
+                                    -backend-config=region=${awsRegion} \
+                                    -var-file=${tfvarsFile}
+                            """
+
+                            // Workspace handling
+                            def existingWorkspaces = sh(script: 'terraform workspace list', returnStdout: true).trim().split("\n").collect{ it.replace("*","").trim() }
+                            if (!existingWorkspaces.contains(envName)) {
+                                sh "terraform workspace new ${envName}"
                             }
+                            sh "terraform workspace select ${envName}"
                         }
                     }
                 }
