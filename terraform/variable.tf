@@ -12,7 +12,6 @@ variable "environment" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t2.micro"
 }
 
 variable "ami_id" {
@@ -21,7 +20,6 @@ variable "ami_id" {
 }
 
 variable "bucket_name" {
-  description = "S3 bucket name"
+  description = "Base bucket name"
   type        = string
 }
-
