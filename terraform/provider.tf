@@ -6,8 +6,7 @@ terraform {
     }
   }
 
-  # Enable workspace usage
-  backend "local" {}
+
 }
 
 provider "aws" {
