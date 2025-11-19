@@ -14,9 +14,9 @@ provider "aws" {
 resource "random_string" "suffix" {
   length  = 6
   special = false
-  upper   = false     # FIX: No uppercase letters
-  number  = true
+  upper   = false
   lower   = true
+  number  = true
 }
 
 resource "aws_instance" "my_ec2" {
@@ -35,3 +35,4 @@ resource "aws_s3_bucket" "my_bucket" {
     Environment = var.env
   }
 }
+
