@@ -4,20 +4,29 @@ pipeline {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'], description: 'Select environment')
     }
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Init Terraform') {
             steps {
                 dir('terraform') {
-                    // Initialize Terraform
-                    sh 'terraform init'
-                    
-                    // Handle workspaces
-                    script {
-                        def workspace = params.ENVIRONMENT
-                        def existingWorkspaces = sh(script: 'terraform workspace list', returnStdout: true).trim().split("\n")
-                        if (!existingWorkspaces.collect{ it.replace("*","").trim() }.contains(workspace)) {
-                            sh "terraform workspace new ${workspace}"
-                        } else {
-                            sh "terraform workspace select ${workspace}"
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+                        script {
+                            def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
+                            
+                            // Initialize Terraform backend and workspace
+                            sh "terraform init -reconfigure -var-file=${tfvarsFile}"
+                            
+                            // Handle Terraform workspaces
+                            def workspace = params.ENVIRONMENT
+                            def existingWorkspaces = sh(script: 'terraform workspace list', returnStdout: true).trim().split("\n")
+                            if (!existingWorkspaces.collect{ it.replace("*","").trim() }.contains(workspace)) {
+                                sh "terraform workspace new ${workspace}"
+                            } else {
+                                sh "terraform workspace select ${workspace}"
+                            }
                         }
                     }
                 }
