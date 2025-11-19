@@ -1,5 +1,19 @@
+terraform {
+  backend "s3" {
+    bucket  = "tudumuganesh-1"
+    key     = "ec2/terraform.tfstate"
+    region  = "ap-south-1"
+    encrypt = true
+  }
+}
+
 provider "aws" {
   region = var.region
+}
+
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
 }
 
 resource "aws_instance" "my_ec2" {
@@ -12,10 +26,9 @@ resource "aws_instance" "my_ec2" {
 }
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "${var.env}-myapp-bucket"
+  bucket = "${var.env}-myapp-bucket-${random_string.suffix.id}"
 
   tags = {
     Environment = var.env
   }
 }
-
