@@ -21,3 +21,9 @@ module "ec2_module" {
   key_name      = "connect"
   instance_name = "My-EC2-Module1"
 }
+
+output "public_ip" {
+  value = module.ec2_module.ec2_public_ip
+}
+
+
