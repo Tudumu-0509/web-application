@@ -14,7 +14,7 @@ output "public_ip" {
   value = module.ec2_module.ec2_public_ip
 }
 
-module "ec2_module" {
+module "ec2_module1" {
   source        = "./modules/ec2"
   ami_id        = "ami-087d1c9a513324697"
   instance_type = "t3.small"
