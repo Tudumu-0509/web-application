@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('aws-cred')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-cred')
+        AWS_DEFAULT_REGION    = "ap-south-1"
+        TF_IN_AUTOMATION      = "true"
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-repo/terraform-module-project.git'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh """
+                cd terraform-modules
+                terraform init
+                """
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                sh """
+                cd terraform-modules
+                terraform validate
+                """
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                sh """
+                cd terraform-modules
+                terraform plan -out=tfplan
+                """
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh """
+                cd terraform-modules
+                terraform apply -auto-approve tfplan
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline Finished!"
+        }
+        success {
+            echo "Terraform Applied Successfully!"
+        }
+        failure {
+            echo "Pipeline Failed!"
+        }
+    }
+}
