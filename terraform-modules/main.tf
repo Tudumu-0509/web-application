@@ -23,7 +23,7 @@ module "ec2_module1" {
 }
 
 output "public_ip1" {
-  value = module.ec2_module.ec2_public_ip1
+  value = module.ec2_module1.ec2_public_ip1
 }
 
 
