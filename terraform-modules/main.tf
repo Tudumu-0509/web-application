@@ -22,8 +22,6 @@ module "ec2_module1" {
   instance_name = "My-EC2-Module1"
 }
 
-output "public_ip" {
+output "public_ip1" {
   value = module.ec2_module1.ec2_public_ip
 }
-
-
