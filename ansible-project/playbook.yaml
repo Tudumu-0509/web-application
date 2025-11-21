@@ -1,10 +1,10 @@
 - hosts: all
   become: yes
-
   vars_files:
-    - vault.yml
+    - vault.yaml
 
   tasks:
     - name: Print DB Password
       debug:
-        msg: "Password = {{ db_password }}"
+        msg: "DB Password is {{ db_password }}"
+
