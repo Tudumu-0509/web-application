@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    environment {
+        VAULT_PASS = credentials('ansible-vault-pass')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/user/ansible-project.git', branch: 'main'
+            }
+        }
+
+        stage('Run Playbook') {
+            steps {
+                sh '''
+                    echo "$VAULT_PASS" > vault-pass.txt
+
+                    ansible-playbook playbook.yml \
+                        -i inventory/hosts \
+                        --vault-password-file vault-pass.txt
+
+                    rm vault-pass.txt
+                '''
+            }
+        }
+    }
+}
