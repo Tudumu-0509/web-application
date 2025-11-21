@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-               git url: 'https://github.com/Tudumu-0509/web-application.git', branch: 'main'
+                git url: 'https://github.com/Tudumu-0509/web-application.git', branch: 'main'
             }
         }
 
@@ -17,8 +17,8 @@ pipeline {
                 sh '''
                     echo "$VAULT_PASS" > vault-pass.txt
 
-                    ansible-playbook playbook.yml \
-                        -i inventory/hosts \
+                    ansible-playbook ansible-project/playbook.yaml \
+                        -i ansible-project/inventory/hosts \
                         --vault-password-file vault-pass.txt
 
                     rm vault-pass.txt
