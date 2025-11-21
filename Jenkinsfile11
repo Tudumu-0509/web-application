@@ -12,6 +12,15 @@ pipeline {
             }
         }
 
+        stage('Add Host Key') {
+            steps {
+                sh '''
+                    mkdir -p ~/.ssh
+                    ssh-keyscan -H 65.0.98.179 >> ~/.ssh/known_hosts
+                '''
+            }
+        }
+
         stage('Run Playbook') {
             steps {
                 sh '''
