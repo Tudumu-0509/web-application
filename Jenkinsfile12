@@ -1,14 +1,6 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(
-            name: 'ANSIBLE_TAG',
-            choices: ['install', 'start', 'copy', 'all'],
-            description: 'Select Ansible Tag to Run'
-        )
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -17,18 +9,14 @@ pipeline {
             }
         }
 
-        stage('Run Ansible With Tags') {
+        stage('Run Only COPY Tag') {
             steps {
                 script {
-
-                    if (params.ANSIBLE_TAG == "all") {
-                        sh "ansible-playbook playbook1.yaml"
-                    } else {
-                        sh "ansible-playbook playbook1.yaml --tags ${params.ANSIBLE_TAG}"
-                    }
-
+                    // Only run "copy" tag
+                    sh "ansible-playbook playbook1.yaml --tags copy"
                 }
             }
         }
     }
 }
+
