@@ -14,7 +14,7 @@ pipeline {
                 script {
                     sh """
                         cd ansible-project
-                        ansible-playbook playbook1.yaml --tags copy
+                        ansible-playbook -i inventory/hosts playbook1.yaml --tags copy
                     """
                 }
             }
