@@ -13,7 +13,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourname/ansible-project.git'
+                git branch: 'main', url: 'https://github.com/Tudumu-0509/web-application.git'
             }
         }
 
