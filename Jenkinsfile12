@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     // Only run "copy" tag
-                    sh "ansible-playbook playbook1.yaml --tags copy"
+                    sh "ansible-playbook tags.yaml --tags copy"
                 }
             }
         }
