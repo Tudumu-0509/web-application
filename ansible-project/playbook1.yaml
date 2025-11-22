@@ -2,24 +2,33 @@
   become: yes
 
   tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      tags: update
 
     - name: Install Apache
-      yum:
-        name: httpd
+      apt:
+        name: apache2
         state: present
-      tags:
-        - install
+      tags: install
 
     - name: Start Apache
       service:
-        name: httpd
+        name: apache2
         state: started
-      tags:
-        - start
+        enabled: yes
+      tags: start
 
-    - name: Copy index1.html file
+    - name: Copy index.html
       copy:
         src: index1.html
         dest: /var/www/html/index.html
-      tags:
-        - copy
+      tags: copy
+
+    - name: Open HTTP port in UFW
+      ufw:
+        rule: allow
+        port: 80
+        proto: tcp
+      tags: firewall
