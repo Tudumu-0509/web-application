@@ -19,7 +19,7 @@
 
     - name: Copy index.html file
       copy:
-        src: index.html
+        src: index1.html
         dest: /var/www/html/index1.html
       tags:
         - copy
