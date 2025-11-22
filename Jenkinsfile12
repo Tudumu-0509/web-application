@@ -12,11 +12,12 @@ pipeline {
         stage('Run Only COPY Tag') {
             steps {
                 script {
-                    // Only run "copy" tag
-                    sh "ansible-playbook playbook1.yaml --tags copy"
+                    sh """
+                        cd ansible-project
+                        ansible-playbook playbook1.yaml --tags copy
+                    """
                 }
             }
         }
     }
 }
-
