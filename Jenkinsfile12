@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
+    }
+
     stages {
 
         stage('Checkout Code') {
@@ -9,17 +13,16 @@ pipeline {
             }
         }
 
-        stage('Run Only COPY Tag') {
+        stage('Run Ansible Playbook') {
             steps {
                 script {
                     sh """
                         cd ansible-project
-                        # Disable host key checking for Ansible
-                        export ANSIBLE_HOST_KEY_CHECKING=False
-                        ansible-playbook -i inventory/hosts playbook1.yaml --tags copy
+                        ansible-playbook -i inventory/hosts playbook1.yaml --tags "install,start,copy,firewall"
                     """
                 }
             }
         }
     }
 }
+
